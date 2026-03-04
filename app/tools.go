@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 )
 
 func read(args string) (string, error) {
@@ -35,4 +36,19 @@ func write(args string) error {
 type WriteFileArgs struct {
 	Path    string `json:"file_path"`
 	Content string `json:"content"`
+}
+
+func bash(args string) (string, error) {
+	var bashArgs BashArgs
+	if err := json.Unmarshal([]byte(args), &bashArgs); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+	cmd := exec.Command("bash", "-c", bashArgs.Command)
+	output, err := cmd.CombinedOutput()
+	return string(output), err
+}
+
+type BashArgs struct {
+	Command string `json:"command"`
 }

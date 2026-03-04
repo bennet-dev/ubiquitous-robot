@@ -95,6 +95,25 @@ func main() {
 					},
 				})
 				// handle write_file
+
+			case "Bash":
+				args := toolCall.Function.Arguments
+
+				fmt.Fprintf(os.Stderr, "Bash tool called with arguments: %v\n", args)
+				output, err := bash(args)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "error: %v\n", err)
+					os.Exit(1)
+				}
+				// Append command output to messages
+				messages = append(messages, openai.ChatCompletionMessageParamUnion{
+					OfTool: &openai.ChatCompletionToolMessageParam{
+						ToolCallID: toolCall.ID,
+						Content: openai.ChatCompletionToolMessageParamContentUnion{
+							OfString: openai.String(output),
+						},
+					},
+				})
 			default:
 				// unknown tool
 			}

@@ -41,6 +41,20 @@ var tools = []openai.ChatCompletionToolUnionParam{
 			"required": []string{"file_path", "content"},
 		},
 	}),
+	openai.ChatCompletionFunctionTool(shared.FunctionDefinitionParam{
+		Name:        "Bash",
+		Description: openai.Opt("Execute a shell command"),
+		Parameters: shared.FunctionParameters{
+			"type":     "object",
+			"required": []string{"command"},
+			"properties": map[string]any{
+				"command": map[string]any{
+					"type":        "string",
+					"description": "The command to execute",
+				},
+			},
+		},
+	}),
 }
 
 func createChatCompletion(client *openai.Client, messages []openai.ChatCompletionMessageParamUnion) (*openai.ChatCompletion, error) {
