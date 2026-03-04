@@ -22,3 +22,17 @@ func read(args string) (string, error) {
 type ReadFileArgs struct {
 	Path string `json:"file_path"`
 }
+
+func write(args string) error {
+	var writeArgs WriteFileArgs
+	if err := json.Unmarshal([]byte(args), &writeArgs); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+	return os.WriteFile(writeArgs.Path, []byte(writeArgs.Content), 0644)
+}
+
+type WriteFileArgs struct {
+	Path    string `json:"file_path"`
+	Content string `json:"content"`
+}

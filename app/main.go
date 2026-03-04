@@ -78,6 +78,22 @@ func main() {
 					},
 				})
 			case "Write":
+				args := toolCall.Function.Arguments
+
+				fmt.Fprintf(os.Stderr, "Write tool called with arguments: %v\n", args)
+				if err := write(args); err != nil {
+					fmt.Fprintf(os.Stderr, "error: %v\n", err)
+					os.Exit(1)
+				}
+				// Append success message to messages
+				messages = append(messages, openai.ChatCompletionMessageParamUnion{
+					OfTool: &openai.ChatCompletionToolMessageParam{
+						ToolCallID: toolCall.ID,
+						Content: openai.ChatCompletionToolMessageParamContentUnion{
+							OfString: openai.String("Write successful"),
+						},
+					},
+				})
 				// handle write_file
 			default:
 				// unknown tool

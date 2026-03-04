@@ -23,6 +23,24 @@ var tools = []openai.ChatCompletionToolUnionParam{
 			"required": []string{"file_path"},
 		},
 	}),
+	openai.ChatCompletionFunctionTool(shared.FunctionDefinitionParam{
+		Name:        "Write",
+		Description: openai.Opt("Write content to a file"),
+		Parameters: shared.FunctionParameters{
+			"type": "object",
+			"properties": map[string]any{
+				"file_path": map[string]any{
+					"type":        "string",
+					"description": "The path to the file to write to",
+				},
+				"content": map[string]any{
+					"type":        "string",
+					"description": "The content to write to the file",
+				},
+			},
+			"required": []string{"file_path", "content"},
+		},
+	}),
 }
 
 func createChatCompletion(client *openai.Client, messages []openai.ChatCompletionMessageParamUnion) (*openai.ChatCompletion, error) {
