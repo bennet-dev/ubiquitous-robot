@@ -6,10 +6,16 @@ import (
 	"fmt"
 	"os"
 
+	"encoding/json"
+
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
 	"github.com/openai/openai-go/v3/shared"
 )
+
+type ReadFileArgs struct {
+	Path string `json:"file_path"`
+}
 
 func main() {
 	var prompt string
@@ -58,8 +64,7 @@ func main() {
 						"required": []string{"file_path"},
 					},
 				}),
-			},
-		},
+			}},
 	)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
@@ -67,6 +72,32 @@ func main() {
 	}
 	if len(resp.Choices) == 0 {
 		panic("No choices in response")
+	}
+
+	toolCalls := resp.Choices[0].Message.ToolCalls
+
+	for _, toolCall := range toolCalls {
+		switch toolCall.Function.Name {
+		case "Read":
+			args := toolCall.Function.Arguments
+
+			fmt.Fprintf(os.Stderr, "Read tool called with arguments: %v\n", args)
+			var readArgs ReadFileArgs
+			if err := json.Unmarshal([]byte(args), &readArgs); err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(1)
+			}
+			content, err := os.ReadFile(readArgs.Path)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(1)
+			}
+			fmt.Printf("%s", content)
+		case "Write":
+			// handle write_file
+		default:
+			// unknown tool
+		}
 	}
 
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
